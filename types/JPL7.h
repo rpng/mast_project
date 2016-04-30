@@ -210,4 +210,157 @@ public:
 };
 
 
+class SonarEdge: public g2o::BaseMultiEdge<2,Eigen::Matrix<double,2,1> >
+{
+
+
+
+public:
+
+    virtual bool read(std::istream& is);
+    virtual bool write(std::ostream& os) const;
+
+    SonarEdge();
+
+
+
+    void setToOriginImpl()
+    {
+    }
+
+
+    void computeError()
+    {
+
+         const JPL7* _calib = static_cast<const JPL7*>(_vertices[0]);
+        const JPL7* _cam = static_cast<const JPL7*>(_vertices[1]);
+        const Feature* _feat = static_cast<const Feature*>(_vertices[2]);
+
+        Eigen::Matrix<double, 7,1 > calib= _calib->estimate();
+
+        Eigen::Matrix<double, 7,1 > cam= _cam->estimate();
+
+        Eigen::Matrix<double, 3,1> feat= _feat->estimate();
+
+        Eigen::Matrix<double, 3,3> R_G_to_C= quat_2_Rot(cam.block(0,0,4,1));
+
+        Eigen::Matrix<double, 3,1> p_c_in_g= cam.block(4,0,3,1);
+
+        Eigen::Matrix<double, 3,3> R_c_to_s = quat_2_Rot(calib.block(0,0,4,1));
+
+        Eigen::Matrix<double, 3,3> p_c_in_s = calib.block(4,0,3,1);
+
+        Eigen::Matrix<double,3,1> p_f_in_s= R_c_to_s*R_G_to_C*(feat- p_c_in_g)+ p_c_in_s;
+
+        double r_hat= p_f_in_s.norm();
+
+        double th_hat= atan2(p_f_in_s(1,0), p_f_in_s(0,0));
+
+        Eigen::Matrix<double, 2,1> z_hat;
+
+        z_hat(0,0) = r_hat;
+
+        z_hat(1,0) = th_hat;
+
+        _error = z_hat-_measurement;
+
+
+
+
+
+    }
+
+    void linearizeOplus()
+    {
+
+        const JPL7* _calib = static_cast<const JPL7*>(_vertices[0]);
+        const JPL7* _cam = static_cast<const JPL7*>(_vertices[1]);
+        const Feature* _feat = static_cast<const Feature*>(_vertices[2]);
+
+        Eigen::Matrix<double, 7,1 > calib= _calib->estimate();
+
+        Eigen::Matrix<double, 7,1 > cam= _cam->estimate();
+
+        Eigen::Matrix<double, 3,1> feat= _feat->estimate();
+
+        Eigen::Matrix<double, 3,3> R_G_to_C= quat_2_Rot(cam.block(0,0,4,1));
+
+        Eigen::Matrix<double, 3,1> p_c_in_g= cam.block(4,0,3,1);
+
+        Eigen::Matrix<double, 3,3> R_c_to_s = quat_2_Rot(calib.block(0,0,4,1));
+
+        Eigen::Matrix<double, 3,3> p_c_in_s = calib.block(4,0,3,1);
+
+        Eigen::Matrix<double,3,1> p_f_in_s= R_c_to_s*R_G_to_C*(feat- p_c_in_g)+ p_c_in_s;
+
+        double x= p_f_in_s(0,0);
+
+        double y= p_f_in_s(1,0);
+
+        double z= p_f_in_s(2,0);
+
+        double p_norm= p_f_in_s.norm();
+
+
+        Eigen::Matrix<double, 2,3> H_spc;
+        H_spc.setZero();
+
+        H_spc(0,0)= (x/p_norm);
+
+        H_spc(0,1) = (y/p_norm);
+
+        H_spc(0,2) = (z/p_norm);
+
+        H_spc(1,0)= (-y/pow(x,2))/(1+pow((y/x),2));
+
+        H_spc(1,1) = (1/x)/(1+pow((y/x),2));
+
+
+        //Derivative with respect to cam
+
+        Eigen::Matrix<double, 3,6> H_c;
+
+        H_c.setZero();
+
+        H_c.block(0,0,3,3)= R_c_to_s*skew_x(R_G_to_C*(feat-p_c_in_g));
+
+        H_c.block(0,3,3,3) = -R_c_to_s*R_G_to_C;
+
+        //Derivative with respect to feat
+
+
+        Eigen::Matrix<double, 3,3> H_f= R_c_to_s*R_G_to_C;
+
+        //Derivative with respect to calib
+
+
+        Eigen::Matrix<double, 3,6> H_ca;
+
+        H_ca.setZero();
+
+        H_ca.block(0,0,3,3)= skew_x(R_c_to_s*R_G_to_C*(feat-p_c_in_g));
+
+        H_ca.block(0,3,3,3)= Eigen::MatrixXd::Identity(3,3);
+
+
+
+
+
+
+        _jacobianOplus[0]= H_spc*H_ca;
+        _jacobianOplus[1]= H_spc*H_c;
+        _jacobianOplus[2]= H;
+
+
+
+
+
+    }
+
+
+
+};
+
+
+
 }

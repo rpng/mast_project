@@ -63,3 +63,23 @@ bool ImageEdge::read(std::istream& is)
 	return false;
 //     Vector7d v7;
 }
+
+
+SonarEdge::SonarEdge() :g2o::BaseMultiEdge<2,Eigen::Matrix<double,2,1> >(){
+    }
+
+bool SonarEdge::write(std::ostream& os) const
+{
+	// TODO
+	assert(false);
+	return false;
+
+}
+
+bool SonarEdge::read(std::istream& is)
+{
+	// TODO
+	assert(false);
+	return false;
+//     Vector7d v7;
+}
