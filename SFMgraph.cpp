@@ -17,6 +17,8 @@
 #include "types/JPL7.h"
 #include <Eigen/Dense>
 
+#include "util/quat_ops.h"
+
 using namespace std;
 using namespace MAST;
 
@@ -78,4 +80,60 @@ void SFMgraph::AddImageEdges(JPL7* Camera_vertex,  cv::Mat Image, vector<Point> 
     i_edge->setInformation(Info);
 
     this->graph->addEdge(i_edge);
+}
+
+
+Eigen::Matrix<double,3,1> triangulate_point (JPL7* Camera_1, JPL7* Camera_2, Point uv1, Point uv2){
+
+    Eigen::Matrix<double, 7, 1> est_1 = Camera_1->estimate();
+
+    Eigen::Matrix<double, 7, 1> est_2 = Camera_2->estimate();
+
+    Eigen::Matrix<double, 3, 3> R_G_to_1 = rot_2_quat(est_1.block(0,0,4,1));
+
+    Eigen::Matrix<double, 3, 3> R_G_to_2 = rot_2_quat(est_2.block(0,0,4,1));
+
+    Eigen::Matrix<double, 3, 3> R_2_to_1 = R_G_to_1* R_G_to_2.transpose();
+
+    Eigen::Matrix<double, 3, 1> p_2_in_G = est_2.block(4,0,3,1);
+
+    Eigen::Matrix<double, 3, 1> p_1_in_G = est_1.block(4,0,3,1);
+
+    Eigen::Matrix<double, 3, 1> p_2_in_1 = R_G_to_1*(p_2_in_G - p_1_in_G );
+
+    //Build Triangulation system equation
+
+
+    Eigen::Matrix<double, 3, 1> b_1;
+    b_1 << uv1.x , uv1.y , 1;
+
+    Eigen::Matrix<double, 3, 1> b_2;
+    b_2 << uv2.x , uv2.y , 1;
+
+
+    Eigen::Matrix<double, 3, 1> b_2_in_1= R_2_to_1*b_2;
+
+    Eigen::Matrix<double, 2, 2> A;
+
+    A << b_1(0,0), -b_2_in_1(0,0),
+        b_1(1,0) , -b_2_in_1(1,0);
+
+    Eigen::Matrix<double, 2, 1> rhs = p_2_in_1.block(0,0,2,1);
+
+    Eigen::Matrix<double, 2, 1> alpha_beta = A.inverse()*rhs;
+
+
+    Eigen::Matrix<double, 3, 1> p_f_in_1= alpha_beta(0,0)*b_1;
+
+    Eigen::Matrix<double, 3, 1> p_f_in_G=  R_G_to_1.transpose()*p_f_in_1+ p_1_in_G;
+
+    return p_f_in_G;
+
+
+
+
+
+
+
+
 }

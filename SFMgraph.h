@@ -32,6 +32,9 @@ namespace MAST {
                            vector<Feature *> Feature_list);
 
 
+        Eigen::Matrix<double,3,1> triangulate_point (JPL7 *Camera_1, JPL7 *Camera_2, Point uv1, Point uv2);
+
+
     };
 
 }
