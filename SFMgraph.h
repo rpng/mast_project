@@ -25,14 +25,22 @@ namespace MAST {
 
         g2o::SparseOptimizer graph;
 
-        void AddImageandSonarEdges(JPL7 *Camera_vertex, JPL7 *Calib, cv::Mat Image, cv::Mat Sonar,
-                                   vector <Point> Image_Features, vector<Feature *> Feature_list);
+        void AddImageandSonarEdges(JPL7* Camera_vertex, JPL7* Calib, cv::Mat Image, cv::Mat Sonar,
+                                   vector <Point> Image_Features, vector<Feature*> Feature_list);
 
-        void AddImageEdges(JPL7 *Camera_vertex, cv::Mat Image, vector <Point> Image_Features,
-                           vector<Feature *> Feature_list);
+        void AddImageEdges(JPL7* Camera_vertex, cv::Mat Image, vector <Point> Image_Features,
+                           vector<Feature*> Feature_list);
 
 
+        //Finds initial position from two "known" camera frames
         Eigen::Matrix<double,3,1> triangulate_point (JPL7 *Camera_1, JPL7 *Camera_2, Point uv1, Point uv2);
+
+
+        //Finds camera position from known feature positions with realtive position measurements
+
+        void find_camera_from_features (JPL7 *Camera_1, vector<Point> uv, vector<Feature*> Feature_list){
+
+        };
 
 
     };

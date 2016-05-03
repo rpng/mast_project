@@ -128,12 +128,41 @@ Eigen::Matrix<double,3,1> triangulate_point (JPL7* Camera_1, JPL7* Camera_2, Poi
     Eigen::Matrix<double, 3, 1> p_f_in_G=  R_G_to_1.transpose()*p_f_in_1+ p_1_in_G;
 
     return p_f_in_G;
-
-
-
-
-
-
-
-
 }
+
+void SFMgraph::find_camera_from_features (JPL7* Camera_1, vector<Eigen::Matrix<double,3,1>> uv, vector<Feature*> Feature_list){
+    int n= uv.size();
+
+    //center of the sets
+    Eigen::Matrix<double,3,1> pc_in_R;
+    Eigen::Matrix<double,3,1> pc_in_G;
+
+    for (size_t i =0; i < n; i++){
+        pc_in_R+= uv[i];
+        pc_in_G+=Feature_list[i].estimate();
+    }
+
+    Eigen::Matrix<double,3,3> M;
+    M.setZero();
+
+    for (size_t i =0; i < n; i++){
+        M+=(uv[i]-pc_in_R)*(Feature_list[i].estimate()-pc_in_G);
+    }
+
+    Eigen::Matrix<double,3,3> P= M.transpose()*M;
+
+    Eigen::Matrix<double,3,3> U= M*(P.inverse()).llt();
+
+    Eigen::Matrix<double,3,3> R= (U.determinant()*U).transpose();
+
+    Eigen::Matrix<double,7,1> pcam_in_G;
+
+    pcam_in_G.block(0,0,4,1) = rot_2_quat(R.transpose());
+
+    pcam_in_G.block(4,0,3,1)= pc_in_G- R*pc_in_R;
+
+    Camera_1->setEstimate(pcam_in_G);
+
+
+
+};
