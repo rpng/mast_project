@@ -13,6 +13,7 @@ find_package(Eigen3 REQUIRED)
 add_executable (ImageSim ImageSim.cpp) 
 
 include_directories(
+	include
 	${EIGEN3_INCLUDE_DIR}
 	${OpenCV_INCLUDE_DIRS}
 )
