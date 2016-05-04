@@ -1,19 +1,14 @@
 //
 // Created by keck on 5/3/16.
 //
-#ifndef MAST_PROJECT_SFMGRAPH_H
-#define MAST_PROJECT_SFMGRAPH_H
-
-#endif //MAST_PROJECT_SFMGRAPH_H
-#pragma once
 
 #include <g2o/core/sparse_optimizer.h>
 #include "opencv2/opencv.hpp"
-#include "Corresponder.h"
+#include "core/Corresponder.h"
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
-#include "SFMgraph.h"
+#include "core/SFMgraph.h"
 #include "types/JPL7.h"
 #include <Eigen/Dense>
 
@@ -30,7 +25,7 @@ void SFMgraph::AddImageandSonarEdges(JPL7* Camera_vertex, JPL7* Calib, cv::Mat I
     vector< pair<double,double> > r_theta = Find_Correspondences(Image, Sonar, Image_Features);
     for (size_t i=0; i < r_theta.size(); i++){
 
-        if (r_theta[i].first !=Infinity) {
+        if (r_theta[i].first !=Eigen::Infinity) {
 
             AddImageEdges( Camera_vertex, Image, Image_Features, Feature_list)
 

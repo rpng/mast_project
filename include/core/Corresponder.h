@@ -1,5 +1,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <iostream>
+#include <Eigen/Eigen>
+
 
 using namespace std;
 using namespace cv;
@@ -7,15 +9,16 @@ using namespace cv;
 
 
 void CallBackFunc(int event, int x, int y, int flags, void* param) {
-    if (evt == CV_EVENT_LBUTTONDOWN) {
+    if (event == CV_EVENT_LBUTTONDOWN) {
         cv::Point *ptPtr = (cv::Point *) param;
         ptPtr->x = x;
         ptPtr->y = y;
     }
 
-    if (evt == CV_EVENT_RBUTTONDOWN) {
-        ptPtr->x = Infinity;
-        ptPtr->y = Infinity;
+    if (event == CV_EVENT_RBUTTONDOWN) {
+        cv::Point *ptPtr = (cv::Point *) param;
+        ptPtr->x = Eigen::Infinity;
+        ptPtr->y = Eigen::Infinity;
     }
 
 }

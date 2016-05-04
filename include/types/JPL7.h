@@ -5,7 +5,7 @@
 #include "g2o/core/base_binary_edge.h"
 #include "g2o/core/base_multi_edge.h"
 #include "g2o/types/sba/types_six_dof_expmap.h"
-#include "../util/quat_ops.h"
+#include "util/quat_ops.h"
 #include "g2o/core/base_unary_edge.h"
 
 
@@ -122,8 +122,8 @@ public:
 
     void computeError()
     {
-        const JPL7* _cam = static_cast<const JPL16*>(_vertices[0]);
-        const JPL16* _feat = static_cast<const JPL16*>(_vertices[1]);
+        const JPL7* _cam = static_cast<const JPL7*>(_vertices[0]);
+        const JPL7* _feat = static_cast<const JPL7*>(_vertices[1]);
 
         Eigen::Matrix<double,7,1> cam_est = _cam->estimate();
         Eigen::Matrix<double,3,1> feat_est = _feat->estimate();
@@ -152,8 +152,8 @@ public:
 
     void linearizeOplus()
     {
-        const JPL7* _cam = static_cast<const JPL16*>(_vertices[0]);
-        const JPL16* _feat = static_cast<const JPL16*>(_vertices[1]);
+        const JPL7* _cam = static_cast<const JPL7*>(_vertices[0]);
+        const Feature* _feat = static_cast<const Feature*>(_vertices[1]);
 
         Eigen::Matrix<double,7,1> cam_est = _cam->estimate();
         Eigen::Matrix<double,3,1> feat_est = _feat->estimate();

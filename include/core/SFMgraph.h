@@ -4,13 +4,11 @@
 
 #ifndef MAST_PROJECT_SFMGRAPH_H
 #define MAST_PROJECT_SFMGRAPH_H
-
-#endif //MAST_PROJECT_SFMGRAPH_H
 #pragma once
 
 #include <g2o/core/sparse_optimizer.h>
 #include "opencv2/opencv.hpp"
-#include "Corresponder.h"
+#include "core/Corresponder.h"
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -46,3 +44,5 @@ namespace MAST {
     };
 
 }
+
+#endif //MAST_PROJECT_SFMGRAPH_H

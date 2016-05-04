@@ -1,5 +1,5 @@
 
-#include "JPL7.h"
+#include "types/JPL7.h"
 #include <g2o/core/factory.h>
 #include <g2o/stuff/macros.h>
 
