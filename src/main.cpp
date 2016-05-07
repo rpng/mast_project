@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include "core/Corresponder.h"
+#include "core/ImageSim.h"
 
 
 

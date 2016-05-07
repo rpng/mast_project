@@ -37,6 +37,8 @@ add_executable(mast_project
 		src/core/SFMgraph.cpp
 		src/types/JPL7.cpp
 		src/core/Corresponder.cpp
+		src/core/ImageSim.cpp
+		src/core/Frame_Classes.cpp
 )
 
 target_link_libraries (mast_project ${OpenCV_LIBS} ${G2O_LIBRARIES})

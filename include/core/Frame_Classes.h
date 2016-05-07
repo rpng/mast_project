@@ -20,6 +20,8 @@ using namespace std;
 
 namespace MAST {
 
+    class Camera;
+
     class Feature_Class {
 
     public:
@@ -32,7 +34,7 @@ namespace MAST {
         vector<pair<double, double> > r_theta_values;
 
         //List of cameras it has been seen in
-        vector<Camera *> as_seen_in;
+        vector<Camera* > as_seen_in;
 
         //True position in the global frame;
         Eigen::Matrix<double, 3, 1> true_position;
@@ -91,14 +93,16 @@ namespace MAST {
             uv.first = -1;
             uv.second = -1;
 
+            double sigma_sq;
+
             if (p_in_c(2, 0) > 3) {
 
                 Eigen::Matrix<double, 3, 1> p_hom = (p_in_c) / (p_in_c(2, 0));
-                Eigen::Matrix<double, 3, 1> pixel = K * p_proj;
+                Eigen::Matrix<double, 3, 1> pixel = K * p_hom;
 
                 if ((pixel(0, 0) >= 0) && (pixel(0, 0) < width) && (pixel(1, 0) >= 0) && (pixel(1, 0) < height)) {
-                    uv.first = (int) addNoise(pixel(0, 0));
-                    uv.second = (int) addNoise(pixel(0, 0));
+                    uv.first = (int) addNoise(pixel(0, 0), sigma_sq);
+                    uv.second = (int) addNoise(pixel(0, 0), sigma_sq);
                     feat->as_seen_in.push_back(this);
                 }
 

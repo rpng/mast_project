@@ -10,14 +10,16 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
-#include "Frame_Classes.h"
+#include "core/Frame_Classes.h"
 
 using namespace std;
 
+namespace MAST {
 
-Feature_Class::Feature_Class(){
+    Feature_Class::Feature_Class() {
+    }
+
+    Camera::Camera() {
+    }
+
 }
-
-Camera::Camera(){
-}
-
