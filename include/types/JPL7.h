@@ -104,11 +104,6 @@ public:
 
 
 
-/**
-* \brief Bias edge between two JPL16's
-*/
-
-
 class ImageEdge : public g2o::BaseBinaryEdge<2, Eigen::Matrix<double, 2,1>, JPL7, Feature>
 {
 public:
