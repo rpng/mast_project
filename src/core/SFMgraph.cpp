@@ -27,7 +27,7 @@ void SFMgraph::AddImageandSonarEdges(JPL7* Camera_vertex, JPL7* Calib, cv::Mat I
 
         if (r_theta[i].first !=Eigen::Infinity) {
 
-            AddImageEdges( Camera_vertex, Image, Image_Features, Feature_list)
+            AddImageEdges( Camera_vertex, Image, Image_Features, Feature_list);
 
 
             //Add Sonar Edge
@@ -52,7 +52,7 @@ void SFMgraph::AddImageandSonarEdges(JPL7* Camera_vertex, JPL7* Calib, cv::Mat I
 
             s_edge->setInformation(Info_S);
 
-            this->graph->addEdge(s_edge);
+            this->graph.addEdge(s_edge);
 
         }
     }
@@ -60,21 +60,24 @@ void SFMgraph::AddImageandSonarEdges(JPL7* Camera_vertex, JPL7* Calib, cv::Mat I
 
 void SFMgraph::AddImageEdges(JPL7* Camera_vertex,  cv::Mat Image, vector<Point> Image_Features, vector<Feature*> Feature_list){
     //Add Image Edge
-    ImageEdge* i_edge= new ImageEdge();
-    i_edge->setVertex(0,Camera_vertex);
-    i_edge->setVertex(1,Feature_list[i]);
+
+    for (size_t i=0; i < Feature_list.size();i++) {
+        ImageEdge *i_edge = new ImageEdge();
+        i_edge->setVertex(0, Camera_vertex);
+        i_edge->setVertex(1, Feature_list[i]);
 
 
-    Eigen::Matrix<double, 2, 1> Meas;
-    Meas << Image_Features[i].x, Image_Features[i].y;
-    i_edge->setMeasurement(Meas);
+        Eigen::Matrix<double, 2, 1> Meas;
+        Meas << Image_Features[i].x, Image_Features[i].y;
+        i_edge->setMeasurement(Meas);
 
-    //Just a placeholder for the true Info
-    Eigen::Matrix<double, 2,2 > Info = Eigen::MatrixXd::Identity(2,2);
+        //Just a placeholder for the true Info
+        Eigen::Matrix<double, 2, 2> Info = Eigen::MatrixXd::Identity(2, 2);
 
-    i_edge->setInformation(Info);
+        i_edge->setInformation(Info);
 
-    this->graph->addEdge(i_edge);
+        this->graph.addEdge(i_edge);
+    }
 }
 
 
@@ -84,9 +87,9 @@ Eigen::Matrix<double,3,1> triangulate_point (JPL7* Camera_1, JPL7* Camera_2, Poi
 
     Eigen::Matrix<double, 7, 1> est_2 = Camera_2->estimate();
 
-    Eigen::Matrix<double, 3, 3> R_G_to_1 = rot_2_quat(est_1.block(0,0,4,1));
+    Eigen::Matrix<double, 3, 3> R_G_to_1 = quat_2_Rot(est_1.block(0,0,4,1));
 
-    Eigen::Matrix<double, 3, 3> R_G_to_2 = rot_2_quat(est_2.block(0,0,4,1));
+    Eigen::Matrix<double, 3, 3> R_G_to_2 = quat_2_Rot(est_2.block(0,0,4,1));
 
     Eigen::Matrix<double, 3, 3> R_2_to_1 = R_G_to_1* R_G_to_2.transpose();
 
@@ -125,39 +128,45 @@ Eigen::Matrix<double,3,1> triangulate_point (JPL7* Camera_1, JPL7* Camera_2, Poi
     return p_f_in_G;
 }
 
-void SFMgraph::find_camera_from_features (JPL7* Camera_1, vector<Eigen::Matrix<double,3,1>> uv, vector<Feature*> Feature_list){
-    int n= uv.size();
+void SFMgraph::find_camera_from_features (JPL7* Camera_1, vector<Eigen::Matrix<double,3,1>> uv, vector<Feature*> Feature_list) {
+    int n = uv.size();
 
     //center of the sets
-    Eigen::Matrix<double,3,1> pc_in_R;
-    Eigen::Matrix<double,3,1> pc_in_G;
+    Eigen::Matrix<double, 3, 1> pc_in_R;
+    Eigen::Matrix<double, 3, 1> pc_in_G;
 
-    for (size_t i =0; i < n; i++){
-        pc_in_R+= uv[i];
-        pc_in_G+=Feature_list[i].estimate();
+    for (size_t i = 0; i < n; i++) {
+        pc_in_R += uv[i];
+        pc_in_G += Feature_list[i]->estimate();
     }
 
-    Eigen::Matrix<double,3,3> M;
+    pc_in_R= pc_in_R/n;
+
+    pc_in_G= pc_in_G/n;
+
+
+
+    Eigen::Matrix<double, 3, 3> M;
     M.setZero();
 
-    for (size_t i =0; i < n; i++){
-        M+=(uv[i]-pc_in_R)*(Feature_list[i].estimate()-pc_in_G);
+
+    for (size_t i = 0; i < n; i++) {
+        M += (uv[i] - pc_in_R) * (Feature_list[i]->estimate() - pc_in_G).transpose();
     }
 
-    Eigen::Matrix<double,3,3> P= M.transpose()*M;
+    Eigen::Matrix<double, 3, 3> P = M.transpose() * M;
 
-    Eigen::Matrix<double,3,3> U= M*(P.inverse()).llt();
+    Eigen::Matrix<double, 3, 3> U = M * ((P.inverse()).llt().matrixL());
 
-    Eigen::Matrix<double,3,3> R= (U.determinant()*U).transpose();
+    Eigen::Matrix<double, 3, 3> R = (U.determinant() * U).transpose();
 
-    Eigen::Matrix<double,7,1> pcam_in_G;
+    Eigen::Matrix<double, 7, 1> pcam_in_G;
 
-    pcam_in_G.block(0,0,4,1) = rot_2_quat(R.transpose());
 
-    pcam_in_G.block(4,0,3,1)= pc_in_G- R*pc_in_R;
+    pcam_in_G.block(0, 0, 4, 1) = rot_2_quat(R.transpose());
+
+    pcam_in_G.block(4, 0, 3, 1) = pc_in_G - R * pc_in_R;
 
     Camera_1->setEstimate(pcam_in_G);
 
-
-
-};
+}

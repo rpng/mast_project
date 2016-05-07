@@ -96,7 +96,7 @@ public:
     {
 
         Eigen::Map< Eigen::Matrix<double, 3, 1> > update(const_cast<double*>(update_));
-        Eigen::Map< Eigen::Matrix<double, 3, 1> > est_up = estimate()+ update;
+        Eigen::Matrix<double, 3, 1>  est_up = estimate()+ update.block(0,0,3,1);
 
         setEstimate(est_up);
     }
@@ -113,7 +113,7 @@ class ImageEdge : public g2o::BaseBinaryEdge<2, Eigen::Matrix<double, 2,1>, JPL7
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    BiasEdge();
+    ImageEdge();
 
     double delta_t;
 
@@ -123,7 +123,7 @@ public:
     void computeError()
     {
         const JPL7* _cam = static_cast<const JPL7*>(_vertices[0]);
-        const JPL7* _feat = static_cast<const JPL7*>(_vertices[1]);
+        const Feature* _feat = static_cast<const Feature*>(_vertices[1]);
 
         Eigen::Matrix<double,7,1> cam_est = _cam->estimate();
         Eigen::Matrix<double,3,1> feat_est = _feat->estimate();
@@ -248,7 +248,7 @@ public:
 
         Eigen::Matrix<double, 3,3> R_c_to_s = quat_2_Rot(calib.block(0,0,4,1));
 
-        Eigen::Matrix<double, 3,3> p_c_in_s = calib.block(4,0,3,1);
+        Eigen::Matrix<double, 3,1> p_c_in_s = calib.block(4,0,3,1);
 
         Eigen::Matrix<double,3,1> p_f_in_s= R_c_to_s*R_G_to_C*(feat- p_c_in_g)+ p_c_in_s;
 
@@ -289,7 +289,7 @@ public:
 
         Eigen::Matrix<double, 3,3> R_c_to_s = quat_2_Rot(calib.block(0,0,4,1));
 
-        Eigen::Matrix<double, 3,3> p_c_in_s = calib.block(4,0,3,1);
+        Eigen::Matrix<double, 3,1> p_c_in_s = calib.block(4,0,3,1);
 
         Eigen::Matrix<double,3,1> p_f_in_s= R_c_to_s*R_G_to_C*(feat- p_c_in_g)+ p_c_in_s;
 
@@ -349,7 +349,7 @@ public:
 
         _jacobianOplus[0]= H_spc*H_ca;
         _jacobianOplus[1]= H_spc*H_c;
-        _jacobianOplus[2]= H;
+        _jacobianOplus[2]= H_spc*H_f;
 
 
 

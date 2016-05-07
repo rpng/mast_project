@@ -43,7 +43,7 @@ bool Feature::read(std::istream& is)
 	return false;
 }
 
-ImageEdge::ImageEdge() : g2o::BaseBinarEdge<2, Eigen::Matrix<double, 2,1>, JPL7, Feature>(){
+ImageEdge::ImageEdge() : g2o::BaseBinaryEdge<2, Eigen::Matrix<double, 2,1>, JPL7, Feature>(){
 
     }
 

@@ -1,15 +1,15 @@
 //
 // Created by keck on 5/3/16.
 //
-
+#pragma once
 #ifndef MAST_PROJECT_SFMGRAPH_H
 #define MAST_PROJECT_SFMGRAPH_H
-#pragma once
+
 
 #include <g2o/core/sparse_optimizer.h>
 #include "opencv2/opencv.hpp"
 #include "core/Corresponder.h"
-
+#include "types/JPL7.h"
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
@@ -36,9 +36,7 @@ namespace MAST {
 
         //Finds camera position from known feature positions with realtive position measurements
 
-        void find_camera_from_features (JPL7 *Camera_1, vector<Point> uv, vector<Feature*> Feature_list){
-
-        };
+        void find_camera_from_features (JPL7* Camera_1, vector<Eigen::Matrix<double,3,1>> uv, vector<Feature*> Feature_list);
 
 
     };
