@@ -55,7 +55,7 @@ namespace MAST {
 
     }
 
-    pair<double, double> sonar_meas_from_pt(Point sonar_pt) {
+    pair<double, double> sonar_meas_from_pt(cv::Point sonar_pt) {
         pair<double, double> r_theta;
         //Here I convert from x,y in sonar image to r and theta
         return r_theta;
