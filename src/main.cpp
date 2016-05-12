@@ -3,14 +3,24 @@
 #include <core/Frame_Classes.h>
 #include "core/Corresponder.h"
 #include "core/ImageSim.h"
+
 #include "core/Frame_Classes.h
 #include "core/SFMgraph.h"
 #include <Eigen/Dense>
 
 using namespace MAST;
 using namespace std;
+=======
+#include "core/Initilizer.h"
 
-    int main() {
+using namespace MAST;
+
+int main() {
+
+
+    Initilizer test = Initilizer();
+    test.testing();
+
 
         Eigen::Matrix<double,3,3> K;
 
@@ -71,4 +81,4 @@ using namespace std;
         }
 
 
-    }
+}

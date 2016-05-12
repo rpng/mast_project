@@ -161,9 +161,9 @@ public:
 
         double x = (c_p_f(0,0));
 
-        double y = (c_p_f(1,0));
+        double y = (c_p_f(2,0));
 
-        double z = (c_p_f(2,0));
+        double z = (c_p_f(3,0));
 
 
 
