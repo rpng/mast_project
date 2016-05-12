@@ -58,12 +58,12 @@ public:
         Eigen::Matrix<double,3,1> d_qvec = .5*d_theta;
         d_q.block(0,0,3,1)= d_qvec;
         if(d_qvec.norm() > 1){
-            d_q(4,0) = 1;
+            d_q(3,0) = 1;
             d_q= (1/(sqrt(1+ d_qvec.transpose()*d_qvec)))*d_q;
         }
         else
         {
-            d_q(4,0)= sqrt(1- d_qvec.transpose()*d_qvec);
+            d_q(3,0)= sqrt(1- d_qvec.transpose()*d_qvec);
         }
 
         Upd_vec.block(0,0,4,1) = quat_multiply(d_q,q_minus );
@@ -159,7 +159,7 @@ public:
 
         Eigen::Matrix<double,3,1> c_p_f = R*(feat_est- p_c);
 
-        double x = (c_p_f(1,0));
+        double x = (c_p_f(0,0));
 
         double y = (c_p_f(1,0));
 

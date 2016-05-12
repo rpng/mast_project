@@ -84,6 +84,7 @@ inline Eigen::Matrix<double,4,1>  quat_multiply(Eigen::Matrix<double,4,1> q, Eig
     Qm.block(3,0,1,3) = -q.block(0,0,3,1).transpose();
     Qm(3,3) = q(3,0);
     q_t= Qm*p;
+    return q_t;
 
 }
 }

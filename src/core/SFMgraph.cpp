@@ -170,3 +170,7 @@ void SFMgraph::find_camera_from_features (JPL7* Camera_1, vector<Eigen::Matrix<d
     Camera_1->setEstimate(pcam_in_G);
 
 }
+
+void SFMgraph::find_feature_from_image_and_sonar (JPL7* Camera, vector<Eigen::Matrix<double,3,1>> uv, double r){
+
+}
