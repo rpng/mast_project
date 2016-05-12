@@ -33,9 +33,7 @@ namespace MAST {
          *
          * init_feat_cam1: use all the constraints from the camera and sonar
          * init_feat_cam2: use a planar triangular method to solve the depth of camera
-         */
-
-        /*
+         *
          * cv:: point pt_img            image u v
          * cv:: point pt_sonar          sonar r th
          * Eigen::Matrix<double,4,1>    quaternion c to s
@@ -47,9 +45,7 @@ namespace MAST {
         /*
          * This function takes 3 corresponding feature points in camera frame k and camera frame k+1
          * and will return the quaternion k+1 to k and translation k+1 in k.
-         */
-
-        /*
+         *
          * Eigen::Matrix<double, 3, 3> feat_cam_k       3 3d feature positions
          * Eigen::Matrix<double, 3, 3> feat_cam_k+1     3 3d feature positions
          */

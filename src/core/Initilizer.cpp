@@ -21,6 +21,7 @@ Eigen::Matrix<double, 3, 1> Initilizer::init_feat_cam1(cv::Point pt_img,
                                                     cv::Point pt_sonar,
                                                     Eigen::Matrix<double, 4, 1> q_c_to_s,
                                                     Eigen::Matrix<double, 3, 1> p_c_in_s) {
+
     //Normalize the uv coordinate of the camera feature points with the camera intrinsic K
     double u_normalized = (pt_img.x - calib_cam_K(1,3))/calib_cam_K(1,1);
     double v_normalized = (pt_img.y - calib_cam_K(2,3))/calib_cam_K(2,2);
@@ -28,6 +29,7 @@ Eigen::Matrix<double, 3, 1> Initilizer::init_feat_cam1(cv::Point pt_img,
     //This is also the bearing of the feature
     Eigen::Matrix<double, 3, 1> bearing_f_c;
     bearing_f_c << u_normalized,v_normalized,1;
+    bearing_f_c = bearing_f_c / bearing_f_c.norm();
 
     //Find the orthogonal vector to the bearing of feature point in camera
     Eigen::Matrix<double, 3, 1> bearing_perpendicular1;
@@ -66,9 +68,39 @@ Eigen::Matrix<double, 3, 1> Initilizer::init_feat_cam1(cv::Point pt_img,
 
 }
 
+Eigen::Matrix<double, 3, 1> Initilizer::init_feat_cam2(cv::Point pt_img,
+                                           cv::Point pt_sonar,
+                                           Eigen::Matrix<double,4,1> q_c_to_s,
+                                           Eigen::Matrix<double,3,1> p_c_in_s){
+    //Normalize the uv coordinate of the camera feature points with the camera intrinsic K
+    double u_normalized = (pt_img.x - calib_cam_K(1,3))/calib_cam_K(1,1);
+    double v_normalized = (pt_img.y - calib_cam_K(2,3))/calib_cam_K(2,2);
 
-Eigen::Matrix<double, 7, 1> init_cam_pose(Eigen::Matrix<double, 3, 3> feat_cam_k,
+    //This is also the bearing of the feature
+    Eigen::Matrix<double, 3, 1> bearing_f_c;
+    bearing_f_c << u_normalized,v_normalized,1;
+    bearing_f_c = bearing_f_c / bearing_f_c.norm();
+
+    Eigen::Matrix<double, 3, 3> R_C_to_S = quat_2_Rot(q_c_to_s);
+
+    Eigen::Matrix<double, 3, 1> p_s_in_c = R_C_to_S.transpose() * p_c_in_s;
+
+    //Construct the linear equation to solve the bearing_f_s
+    double r_sonar = pt_sonar.x;
+    double th_sonar = pt_sonar.y;
+
+    //Triangular solution
+    double dot_prod_bearing_and_psc = bearing_f_c.transpose() * p_s_in_c;
+    double norm_p_s_in_c = p_s_in_c.norm();
+    double depth_cam = dot_prod_bearing_and_psc + sqrt(pow(dot_prod_bearing_and_psc,2)+ pow(r_sonar,2)-pow(norm_p_s_in_c,2));
+    Eigen::Matrix<double, 3, 1> feat_init = depth_cam * bearing_f_c;
+
+};
+
+Eigen::Matrix<double, 7, 1> Initilizer::init_cam_pose(Eigen::Matrix<double, 3, 3> feat_cam_k,
                                           Eigen::Matrix<double, 3, 3> feat_cam_k_plus_1){
+
+
     Eigen::Matrix<double, 3, 1> feat1_cam_k = feat_cam_k.block(0,0,1,3).transpose();
     Eigen::Matrix<double, 3, 1> feat2_cam_k = feat_cam_k.block(1,0,1,3).transpose();
     Eigen::Matrix<double, 3, 1> feat3_cam_k = feat_cam_k.block(2,0,1,3).transpose();
@@ -100,5 +132,9 @@ Eigen::Matrix<double, 7, 1> init_cam_pose(Eigen::Matrix<double, 3, 3> feat_cam_k
     p_k_plus_1_in_k = p_k_plus_1_in_k/3;
 
     Eigen::Matrix<double, 7, 1> cam_pose_k_k_plus_1;
+    cam_pose_k_k_plus_1.block(0,0,4,1) = rot_2_quat(R_k_plus_1_to_k);
+    cam_pose_k_k_plus_1.block(4,0,3,1) = p_k_plus_1_in_k;
+
+    return cam_pose_k_k_plus_1;
 
 };
