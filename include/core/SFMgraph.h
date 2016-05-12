@@ -38,7 +38,7 @@ namespace MAST {
 
         void find_camera_from_features (JPL7* Camera_1, vector<Eigen::Matrix<double,3,1>> uv, vector<Feature*> Feature_list);
 
-        void find_feature_from_image_and_sonar (JPL7* Camera, vector<Eigen::Matrix<double,3,1>> uv, double r);
+        Eigen::Matrix<double,3,1> find_feature_from_image_and_sonar (JPL7* Camera, vector<Eigen::Matrix<double,3,1>> uv, double r);
 
 
     };

@@ -11,6 +11,7 @@
 #include "core/SFMgraph.h"
 #include "types/JPL7.h"
 #include <Eigen/Dense>
+#include "core/Frame_Classes.h"
 
 #include "util/quat_ops.h"
 
@@ -58,7 +59,7 @@ void SFMgraph::AddImageandSonarEdges(JPL7* Camera_vertex, JPL7* Calib, cv::Mat I
     }
 }
 
-void SFMgraph::AddImageEdges(JPL7* Camera_vertex,  cv::Mat Image, vector<Point> Image_Features, vector<Feature*> Feature_list){
+void SFMgraph::AddImageEdges(JPL7* Camera_vertex,  cv::Mat Image, vector<Point> Image_Features, vector<Feature_Class*> Feature_list){
     //Add Image Edge
 
     for (size_t i=0; i < Feature_list.size();i++) {
@@ -128,9 +129,13 @@ Eigen::Matrix<double,3,1> triangulate_point (JPL7* Camera_1, JPL7* Camera_2, Poi
     return p_f_in_G;
 }
 
-void SFMgraph::find_camera_from_features (JPL7* Camera_1, vector<Eigen::Matrix<double,3,1>> uv, vector<Feature*> Feature_list) {
+void SFMgraph::find_camera_from_features (JPL7* Camera_1, vector<Eigen::Matrix<double,3,1>> uv, vector<Feature_Class*> Feature_Class_list) {
     int n = uv.size();
 
+
+    for (int i=0; i < Feature_Class_list.size(); i++){
+
+    }
     //center of the sets
     Eigen::Matrix<double, 3, 1> pc_in_R;
     Eigen::Matrix<double, 3, 1> pc_in_G;

@@ -27,6 +27,8 @@ namespace MAST {
     public:
         Feature_Class();
 
+        bool initialized;
+
         //vector of pixel coordinates that the feature is seen in. If it is not seen in a given image, then the pair is -1,-1
         vector<pair<int, int> > uv_locations;
 
@@ -39,7 +41,11 @@ namespace MAST {
         //True position in the global frame;
         Eigen::Matrix<double, 3, 1> true_position;
 
-        Feature *feature;
+        Feature* feature;
+
+        vector<Camera*> seen_from_image;
+
+        vector<Camera*> seen_from_image_and_sonar;
 
 
     };
