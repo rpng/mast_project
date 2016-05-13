@@ -54,7 +54,7 @@ namespace MAST {
 
     public:
 
-        JPL7 *pose;
+        bool initialized;
 
         Camera();
 
@@ -101,15 +101,17 @@ namespace MAST {
 
             double sigma_sq;
 
-            if (p_in_c(2, 0) > 3) {
+            if (p_in_c(2, 0) > 0) {
 
                 Eigen::Matrix<double, 3, 1> p_hom = (p_in_c) / (p_in_c(2, 0));
                 Eigen::Matrix<double, 3, 1> pixel = K * p_hom;
 
                 if ((pixel(0, 0) >= 0) && (pixel(0, 0) < width) && (pixel(1, 0) >= 0) && (pixel(1, 0) < height)) {
+                    //cout << "They should be added" << endl;
                     uv.first = (int) addNoise(pixel(0, 0), sigma_sq);
-                    uv.second = (int) addNoise(pixel(0, 0), sigma_sq);
+                    uv.second = (int) addNoise(pixel(1, 0), sigma_sq);
                     feat->as_seen_in.push_back(this);
+                    feature_list.push_back(feat);
                 }
 
                 feat->uv_locations.push_back(uv);
@@ -127,17 +129,35 @@ namespace MAST {
 
             Eigen::Matrix<double, 3, 1> p_in_s = R_C_to_S * R_G_to_C * (feat->true_position - p_G_to_C) + p_c_in_s;
 
+            /*cout << p_in_s << endl << endl;
+
+            cout << feat->true_position << endl << endl;
+
+            cout << p_G_to_C << endl << endl;
+
+            cout << p_c_in_s << endl << endl;*/
+
+
             double r = p_in_s.norm();
 
             double theta = atan2(p_in_s(1, 0), p_in_s(0, 0));
 
-            double psi = atan2(p_in_s(2, 0), sqrt(pow(p_in_s(1, 0), 2) + pow(p_in_s(1, 0), 2)));
+            double psi = atan2(p_in_s(2, 0), (sqrt(pow(p_in_s(0, 0), 2) + pow(p_in_s(1, 0), 2))));
+
+            /*cout << r << " , " << theta << " , " << psi << endl << endl;
+
+            std::exit(1);*/
 
             if ((abs(r) < r_max) && (abs(theta) < th_max) && (abs(psi) < psi_max)) {
                 r_theta.first = r;
                 r_theta.second = theta;
-                feat->r_theta_values.push_back(r_theta);
+                if (feat->uv_locations[this->id].first == -1){
+                    feature_list.push_back(feat);
+
+                }
+
             }
+            feat->r_theta_values.push_back(r_theta);
 
 
         }

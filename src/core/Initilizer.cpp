@@ -12,9 +12,18 @@ void Initilizer::testing() {
 }
 
 Initilizer::Initilizer() {
-    calib_cam_K << 1200,  0  , 600,
-                     0,  1200, 400,
-                     0,    0,   1;
+    Eigen::Matrix<double,3,3> K;
+    K.setZero();
+
+    K(0,0) = 466.6599239525347;
+
+    K(0,2) = 408.15836612911477;
+
+    K(1,1) = 465.8386070513852;
+    K(1,2) = 243.27181754452832;
+
+    K(2,2) = 1.0;
+    calib_cam_K =K;
 }
 
 Eigen::Matrix<double, 3, 1> Initilizer::init_feat_cam1(cv::Point pt_img,
@@ -23,8 +32,8 @@ Eigen::Matrix<double, 3, 1> Initilizer::init_feat_cam1(cv::Point pt_img,
                                                     Eigen::Matrix<double, 3, 1> p_c_in_s) {
 
     //Normalize the uv coordinate of the camera feature points with the camera intrinsic K
-    double u_normalized = (pt_img.x - calib_cam_K(1,3))/calib_cam_K(1,1);
-    double v_normalized = (pt_img.y - calib_cam_K(2,3))/calib_cam_K(2,2);
+    double u_normalized = (pt_img.x - calib_cam_K(0,2))/calib_cam_K(0,0);
+    double v_normalized = (pt_img.y - calib_cam_K(1,2))/calib_cam_K(1,1);
 
     //This is also the bearing of the feature
     Eigen::Matrix<double, 3, 1> bearing_f_c;
@@ -73,8 +82,8 @@ Eigen::Matrix<double, 3, 1> Initilizer::init_feat_cam2(cv::Point pt_img,
                                            Eigen::Matrix<double,4,1> q_c_to_s,
                                            Eigen::Matrix<double,3,1> p_c_in_s){
     //Normalize the uv coordinate of the camera feature points with the camera intrinsic K
-    double u_normalized = (pt_img.x - calib_cam_K(1,3))/calib_cam_K(1,1);
-    double v_normalized = (pt_img.y - calib_cam_K(2,3))/calib_cam_K(2,2);
+    double u_normalized = (pt_img.x - calib_cam_K(0,2))/calib_cam_K(0,0);
+    double v_normalized = (pt_img.y - calib_cam_K(1,2))/calib_cam_K(1,1);
 
     //This is also the bearing of the feature
     Eigen::Matrix<double, 3, 1> bearing_f_c;
@@ -94,6 +103,8 @@ Eigen::Matrix<double, 3, 1> Initilizer::init_feat_cam2(cv::Point pt_img,
     double norm_p_s_in_c = p_s_in_c.norm();
     double depth_cam = dot_prod_bearing_and_psc + sqrt(pow(dot_prod_bearing_and_psc,2)+ pow(r_sonar,2)-pow(norm_p_s_in_c,2));
     Eigen::Matrix<double, 3, 1> feat_init = depth_cam * bearing_f_c;
+
+    return feat_init;
 
 };
 

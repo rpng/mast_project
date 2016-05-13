@@ -6,7 +6,7 @@
 // Created by keck on 5/4/16.
 //
 
-#pragma once
+
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
@@ -17,9 +17,12 @@ using namespace std;
 namespace MAST {
 
     Feature_Class::Feature_Class() {
+        this->feature= new Feature();
+
     }
 
     Camera::Camera() {
+        this->camera_vertex= new JPL7();
     }
 
 }

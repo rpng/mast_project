@@ -42,7 +42,8 @@ add_executable(mast_project
 		src/core/Initilizer.cpp
 )
 
-target_link_libraries (mast_project ${OpenCV_LIBS} ${G2O_LIBRARIES})
+target_link_libraries (mast_project ${OpenCV_LIBS} ${G2O_LIBRARIES} csparse
+	cxsparse)
 
 
 

@@ -24,9 +24,9 @@ namespace MAST {
 
 
         for (int i = 0; i < Feat_number; i++) {
-            x = rand() % 20;
-            y = rand() % 20;
-            z = rand() % 20;
+            x = rand() % 3;
+            y = rand() % 3;
+            z = rand() % 3;
 
 //cout << (((float) rand()) / (float) RAND_MAX) << endl;
 
@@ -50,10 +50,14 @@ namespace MAST {
 
             feat->true_position = true_p;
 
+            feat->initialized=false;
+
             for (size_t c = 0; c < cam_vec.size(); c++) {
                 cam_vec[c]->project_point(feat);
                 cam_vec[c]->project_point_to_Sonar(feat);
             }
+
+            //cout << x << " , " << y << " , " << z << endl;
 
 
         }
@@ -65,13 +69,13 @@ namespace MAST {
 
         srand(time(NULL));
 
-        double theta = 0;
+        double theta = -M_PI_2/2;
 
         double x = start_x;
 
         double y = start_y;
 
-        double z = rand() % 20;
+        double z = rand() % 3;
 
         bool zsign = rand() % 2;
 
@@ -100,7 +104,7 @@ namespace MAST {
                     -sin(theta), cos(theta), 0,
                     0, 0, 1;
 
-            double psi = atan2(z, r);
+            double psi = -(atan2(z, r)+M_PI_2);
 
             Eigen::Matrix<double, 3, 3> Rn_x;
 
@@ -179,6 +183,8 @@ namespace MAST {
 
             cam_i->p_G_to_C = p_c_in_g;
 
+            cout << "THIS IS WHAT PCIG SHOULD BE -" << endl << p_c_in_g << endl << endl;
+
             cam_i->id = n;
 
             cam_vec.push_back(cam_i);
@@ -187,19 +193,21 @@ namespace MAST {
 
             //Start next camera
 
-            theta += M_PI_2 - (num_cams - 2) * (M_PI) / num_cams;
 
-            double zplus = rand() % 20 + (((float) rand()) / (float) RAND_MAX);
+
+            double zplus = rand() % 3 + (((float) rand()) / (float) RAND_MAX);
 
             bool zplussign = rand() % 2;
 
             if (zplussign) zplus *= -1;
 
-            z = z + zplus;
+            z = zplus;
 
             x += side_length * cos(theta);
 
             y += side_length * sin(theta);
+
+            theta+= 2*M_PI/num_cams;
 
 
             n++;

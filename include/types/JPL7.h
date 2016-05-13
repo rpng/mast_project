@@ -70,9 +70,10 @@ public:
         Upd_vec.block(4,0,3,1) = rest_minus+rest_upd;
 
 
-
         setEstimate(Upd_vec);
     }
+
+
 };
 
 
@@ -100,6 +101,7 @@ public:
 
         setEstimate(est_up);
     }
+
 };
 
 
@@ -109,8 +111,6 @@ class ImageEdge : public g2o::BaseBinaryEdge<2, Eigen::Matrix<double, 2,1>, JPL7
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     ImageEdge();
-
-    double delta_t;
 
     virtual bool read(std::istream& is);
     virtual bool write(std::ostream& os) const;
@@ -161,9 +161,9 @@ public:
 
         double x = (c_p_f(0,0));
 
-        double y = (c_p_f(2,0));
+        double y = (c_p_f(1,0));
 
-        double z = (c_p_f(3,0));
+        double z = (c_p_f(2,0));
 
 
 
@@ -181,6 +181,14 @@ public:
 
         H_i.block(0,6,3,3) = R;
 
+        /*cout << "H_i" << endl << H_i << endl;
+
+
+        cout << "H_pf" << endl << Hpf << endl;
+
+        std::exit(1);*/
+
+
 
         Eigen::Matrix<double,2,9> H = Hpf*H_i;
 
@@ -188,8 +196,8 @@ public:
 
 
 
-        _jacobianOplusXj = H.block(0,0,2,6);
-        _jacobianOplusXi = H.block(0,6,2,3);
+        _jacobianOplusXi = H.block(0,0,2,6);
+        _jacobianOplusXj = H.block(0,6,2,3);
 
         /*cout << "H_j" << endl << H_j << endl << endl;
 
@@ -355,6 +363,70 @@ public:
 
 
 };
+
+    class PriorEdge : public g2o::BaseUnaryEdge<6, Eigen::Matrix<double,6,1>, JPL7 >
+    {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        PriorEdge();
+
+        bool read(std::istream& is);
+        bool write(std::ostream& os) const;
+
+        Eigen::Matrix<double,7,1> prior_meas;
+
+        void computeError()
+        {
+            //cout << "Prior error" << endl;
+            const JPL7* prior = static_cast<const JPL7*>(_vertices[0]);
+
+            Eigen::Matrix<double,7,1> p_est= prior->estimate();
+
+            Eigen::Matrix<double,4,1> est_quat= p_est.block(0,0,4,1);
+
+            Eigen::Matrix<double,4,1> meas_quat= prior_meas.block(0,0,4,1);
+
+            Eigen::Matrix<double,4,1> err_quat= rot_2_quat(quat_2_Rot(est_quat)*quat_2_Rot(meas_quat).transpose());
+
+
+            Eigen::Matrix<double,6,1> error_;
+
+            error_.block(0,0,3,1) = 2*err_quat.block(0,0,3,1);
+            error_.block(3,0,3,1) = p_est.block(4,0,3,1);
+
+            _error= error_;
+
+            //cout << "Prior error end" << endl;
+        }
+
+        void linearizeOplus()
+        {
+            const JPL7* prior = static_cast<const JPL7*>(_vertices[0]);
+
+            Eigen::Matrix<double,7,1> p_est= prior->estimate();
+
+            Eigen::Matrix<double,4,1> est_quat= p_est.block(0,0,4,1);
+
+            Eigen::Matrix<double,4,1> meas_quat= prior_meas.block(0,0,4,1);
+
+            Eigen::Matrix<double,4,1> err_quat= rot_2_quat(quat_2_Rot(est_quat)*quat_2_Rot(meas_quat).transpose());
+
+            Eigen::Matrix<double,6,6> Hi;
+
+            Hi.setZero();
+
+            Hi.block(0,0,3,3)= err_quat(3,0)*Eigen::MatrixXd::Identity(3,3)+ skew_x(err_quat.block(0,0,3,1));
+
+
+
+
+            _jacobianOplusXi = Hi;
+            //cout << "Lin pri begin" << endl;
+        }
+
+
+
+    };
 
 
 

@@ -83,3 +83,23 @@ bool SonarEdge::read(std::istream& is)
 	return false;
 //     Vector7d v7;
 }
+
+PriorEdge::PriorEdge() : g2o::BaseUnaryEdge<6, Eigen::Matrix<double,6,1>, JPL7 >(){
+
+}
+
+bool PriorEdge::write(std::ostream& os) const
+{
+	// TODO
+	assert(false);
+	return false;
+
+}
+
+bool PriorEdge::read(std::istream& is)
+{
+	// TODO
+	assert(false);
+	return false;
+//     Vector7d v7;
+}

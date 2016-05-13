@@ -70,7 +70,7 @@ inline Eigen::MatrixXd quat_2_Rot(Eigen::Matrix<double, 4,1> q)
 
 {
     Eigen::Matrix<double,3,3> q_x= skew_x(q.block(0,0,3,1));
-    Eigen::MatrixXd Rot = (2*q(3,0)-1)*Eigen::MatrixXd::Identity(3,3)-2*q(3,0)*q_x+2*q.block(0,0,3,1)*(q.block(0,0,3,1).transpose());
+    Eigen::MatrixXd Rot = (2*pow(q(3,0),2)-1)*Eigen::MatrixXd::Identity(3,3)-2*q(3,0)*q_x+2*q.block(0,0,3,1)*(q.block(0,0,3,1).transpose());
     return Rot;
 }
 
