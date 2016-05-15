@@ -346,7 +346,9 @@ public:
         H_ca.block(0,3,3,3)= Eigen::MatrixXd::Identity(3,3);
 
 
+        /*cout << "H_ca- " << endl << H_ca << endl;
 
+        std::exit(1);*/
 
 
 
@@ -386,13 +388,15 @@ public:
 
             Eigen::Matrix<double,4,1> meas_quat= prior_meas.block(0,0,4,1);
 
-            Eigen::Matrix<double,4,1> err_quat= rot_2_quat(quat_2_Rot(est_quat)*quat_2_Rot(meas_quat).transpose());
+            Eigen::Matrix<double,4,1> err_quat= rot_2_quat(quat_2_Rot(est_quat)*(quat_2_Rot(meas_quat).transpose()));
 
 
             Eigen::Matrix<double,6,1> error_;
 
             error_.block(0,0,3,1) = 2*err_quat.block(0,0,3,1);
-            error_.block(3,0,3,1) = p_est.block(4,0,3,1);
+            error_.block(3,0,3,1) = p_est.block(4,0,3,1)- prior_meas.block(4,0,3,1);
+
+
 
             _error= error_;
 
@@ -415,7 +419,16 @@ public:
 
             Hi.setZero();
 
-            Hi.block(0,0,3,3)= err_quat(3,0)*Eigen::MatrixXd::Identity(3,3)+ skew_x(err_quat.block(0,0,3,1));
+            Hi.block(0,0,3,3)=  err_quat(3,0)*Eigen::MatrixXd::Identity(3,3)+ skew_x(err_quat.block(0,0,3,1));
+
+                    //Eigen::MatrixXd::Identity(3,3);
+
+            Hi.block(3,3,3,3)= Eigen::MatrixXd::Identity(3,3);
+
+
+            /*cout << "pri Jac" << endl << Hi << endl;
+
+            std::exit(1);*/
 
 
 

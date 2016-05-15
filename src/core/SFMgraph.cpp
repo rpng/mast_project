@@ -38,7 +38,7 @@ namespace MAST {
         //typedef g2o::LinearSolverPCG<BlockSolver::PoseMatrixType> LinearSolver;
         LinearSolver* solver = new LinearSolver();
         BlockSolver* blockSolver = new BlockSolver(solver);
-        g2o::OptimizationAlgorithmGaussNewton* algorithm = new g2o::OptimizationAlgorithmGaussNewton(blockSolver);
+        g2o::OptimizationAlgorithmLevenberg* algorithm = new g2o::OptimizationAlgorithmLevenberg(blockSolver);
         this->graph.setAlgorithm(algorithm);
 
         this->graph.setVerbose(false); // printOptimizationInfo

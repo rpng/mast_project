@@ -99,17 +99,38 @@ namespace MAST {
             uv.first = -1;
             uv.second = -1;
 
-            double sigma_sq;
+            //double sigma_sq;
 
             if (p_in_c(2, 0) > 0) {
 
                 Eigen::Matrix<double, 3, 1> p_hom = (p_in_c) / (p_in_c(2, 0));
                 Eigen::Matrix<double, 3, 1> pixel = K * p_hom;
 
+                int xn= rand() %5;
+
+                bool xnsign= rand() %2;
+
+                int yn= rand() %5;
+
+                bool ynsign= rand() %2;
+
+                if (xnsign) xn=-1*xn;
+
+                if (ynsign) yn=-1*yn;
+
+                /*cout << "xn- " << xn <<  endl;
+
+                cout << "yn- " << yn  << endl;*/
+
+                int un=  pixel(0, 0)+xn;
+
+                int vn= pixel(1,0)+yn;
+
+
                 if ((pixel(0, 0) >= 0) && (pixel(0, 0) < width) && (pixel(1, 0) >= 0) && (pixel(1, 0) < height)) {
                     //cout << "They should be added" << endl;
-                    uv.first = (int) addNoise(pixel(0, 0), sigma_sq);
-                    uv.second = (int) addNoise(pixel(1, 0), sigma_sq);
+                    uv.first = un;
+                    uv.second = vn;
                     feat->as_seen_in.push_back(this);
                     feature_list.push_back(feat);
                 }
@@ -142,6 +163,36 @@ namespace MAST {
 
             double theta = atan2(p_in_s(1, 0), p_in_s(0, 0));
 
+
+
+
+            double rn= rand() %5;
+
+            bool rnsign= rand() %2;
+
+            double thn=  (((float) rand()) / (float) RAND_MAX);
+
+            bool thnsign= rand() %2;
+
+
+            rn = rn + (((float) rand()) / (float) RAND_MAX);
+
+            rn= rn/50;
+
+
+            cout << "RN" << endl << rn << endl << endl;
+
+            if (rnsign) rn=-1*rn;
+
+            if (thnsign) thn=-1*thn;
+
+
+
+            double rc=  r+rn;
+
+            double thc= theta+thn;
+
+
             double psi = atan2(p_in_s(2, 0), (sqrt(pow(p_in_s(0, 0), 2) + pow(p_in_s(1, 0), 2))));
 
             /*cout << r << " , " << theta << " , " << psi << endl << endl;
@@ -149,8 +200,8 @@ namespace MAST {
             std::exit(1);*/
 
             if ((abs(r) < r_max) && (abs(theta) < th_max) && (abs(psi) < psi_max)) {
-                r_theta.first = r;
-                r_theta.second = theta;
+                r_theta.first = rc;
+                r_theta.second = thc;
                 if (feat->uv_locations[this->id].first == -1){
                     feature_list.push_back(feat);
 

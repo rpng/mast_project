@@ -13,7 +13,6 @@ using namespace MAST;
 using namespace std;
 #include "core/Initilizer.h"
 
-using namespace MAST;
 
 int main() {
 
@@ -23,9 +22,15 @@ int main() {
     /*Initilizer test = Initilizer();
     test.testing();*/
 
-    Eigen::Matrix<double,2,2> ImageInfo= 100*Eigen::MatrixXd::Identity(2,2);
+    Eigen::Matrix<double,2,2> ImageInfo= Eigen::MatrixXd::Identity(2,2);
 
-    Eigen::Matrix<double,2,2> SonarInfo= 100*Eigen::MatrixXd::Identity(2,2);
+    Eigen::Matrix<double,2,2> SonarInfo= Eigen::MatrixXd::Zero(2,2);
+
+    SonarInfo(0,0) = 400;
+
+    SonarInfo(0,0) = 1;
+
+    Eigen::Matrix<double,7,1> cam_check;
 
 
 
@@ -79,7 +84,21 @@ int main() {
 
     Eigen::Matrix<double, 3, 1> p_c_in_s;
 
+
+    Eigen::Matrix<double,3,3> Reps;
+
+    Reps<<   cos(.1), -sin(.1),0,
+            sin(.1), cos(.1), 0,
+            0, 0, 1;
+
+
+
     p_c_in_s << 0, 0, 0;
+
+
+    Eigen::Matrix<double, 3, 1> p_c_in_s_err;
+
+    p_c_in_s_err << .02, -.04, .03;
 
 
         for (int i=0; i < cam_vec.size(); i++){
@@ -103,15 +122,15 @@ int main() {
 
     Calib->setId(0);
 
-    Calib->setFixed(true);
+    //Calib->setFixed(true);
 
     int edgeID=0;
 
     Eigen::Matrix<double,7,1> calib_meas;
 
-    calib_meas.block(0,0,4,1)= rot_2_quat((Ryneg90*Rxneg90).transpose());
+    calib_meas.block(0,0,4,1)= rot_2_quat((Ryneg90*Rxneg90).transpose()*Reps);
 
-    calib_meas.block(4,0,3,1)= p_c_in_s;
+    calib_meas.block(4,0,3,1)= p_c_in_s_err;
 
     Calib->setEstimate(calib_meas);
 
@@ -127,7 +146,13 @@ int main() {
 
     CalibPrior->prior_meas= calib_meas;
 
-    CalibPrior->setInformation(100*Eigen::MatrixXd::Identity(6,6));
+    Eigen::Matrix<double,6,6> PriInf= Eigen::MatrixXd::Zero(6,6);
+
+    PriInf.block(0,0,3,3)= 100*Eigen::MatrixXd::Identity(3,3);
+
+    PriInf.block(3,3,3,3)= 400*Eigen::MatrixXd::Identity(3,3);
+
+    CalibPrior->setInformation(Eigen::MatrixXd::Identity(6,6));
 
     assert(Calib != nullptr);
 
@@ -167,7 +192,9 @@ int main() {
 
 
 
-    ImageSim(cam_vec, 1000);
+    ImageSim(cam_vec, 20);
+
+    //std::exit(1);
 
     cout << "main 74" << endl;
 
@@ -271,6 +298,15 @@ int main() {
                             Calib->estimate().block(0,0,4,1), Calib->estimate().block(4,0,3,1)));
 
 
+                    cout << "Triangle Estimate" << endl << feat_for_init->feature->estimate() << endl << endl << "..........................." << endl << endl;
+
+
+                    if (std::isnan(feat_for_init->feature->estimate().norm())){
+                        cout << "BAD INITIAL" << endl;
+                        std::exit(1);
+                    }
+
+
                     feat_for_init->feature->setId(id_count);
 
                     id_count++;
@@ -311,6 +347,7 @@ int main() {
 
 
 
+
                             ps_in_c.push_back(p_f_in_c);
                             feat_for_triang.push_back(feat_for_init);
                             feat_graph.push_back(feat_for_init->feature);
@@ -322,7 +359,7 @@ int main() {
                 if (ps_in_c.size() > 2) {
 
 
-
+                    //cout << "cam FIND 20" << endl;
                     Graph->find_camera_from_features(cam_t->camera_vertex, ps_in_c, feat_for_triang);
 
                     good = Graph->graph.addVertex(cam_t->camera_vertex);
@@ -334,7 +371,7 @@ int main() {
                 }
             }
 
-                    cout << "main 323" << endl;
+                    //cout << "main 323" << endl;
 
                     if (!cam_t->initialized){
                         cout << "DID NOT INITIALIZE" << endl;
@@ -385,6 +422,15 @@ int main() {
                             Eigen::Matrix<double, 3, 1> p_f_in_ci = Init->init_feat_cam2(
                                     cv::Point(uvimeas.first, uvimeas.second), cv::Point(feat_i->r_theta_values[t].first, feat_i->r_theta_values[t].second),
                                     Calib->estimate().block(0,0,4,1), Calib->estimate().block(4,0,3,1));
+
+
+                            //cout << "Triangle Estimate" << p_f_in_ci << endl << endl << "..........................." << endl << endl;
+
+
+                            if (std::isnan(p_f_in_ci.norm())){
+                                cout << "BAD INITIAL" << endl;
+                                std::exit(1);
+                            }
 
                             Eigen::Matrix<double, 3, 1> p_f_ing = Rt.transpose() * (p_f_in_ci - pt);
 
@@ -509,7 +555,14 @@ int main() {
 
 
                                 Eigen::Matrix<double,3,1> p_f_in_g= R_g_2_o*(p_f_in_c_o) + p_o_in_g;
+
+
+                                //cout << "P FROM UV STUFF" << endl;
                                 feat_i->feature->setEstimate(p_f_in_g);
+
+                                //cout << p_f_in_g << endl;
+
+                                //cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl << endl;
 
                                 id_count++;
                                 Graph->graph.addVertex(feat_i->feature);
@@ -616,16 +669,32 @@ int main() {
             cout << "Here 593" << endl;
 
 
+                    cout << "Hello 618" << endl;
+                    Graph->graph.optimize(10);
 
-                    Graph->graph.optimize(20);
+            Eigen::Matrix<double,3,3> R_g_2_0= cam_vec[0]->R_G_to_C;
+
+            Eigen::Matrix<double,3,1> p_0_in_g= cam_vec[0]->p_G_to_C;
+
+            for (int c=0; c< t; c++){
+                Camera* cam_c= cam_vec[c];
+                Eigen::Matrix<double,3,3> R_0_2_c= quat_2_Rot(cam_vec[c]->camera_vertex->estimate().block(0,0,4,1));
+                Eigen::Matrix<double,3,1> p_c_in_0  =cam_vec[c]->camera_vertex->estimate().block(4,0,3,1);
+                cout << "Camera " << c << " true values- " << endl << "R_true- " << endl << cam_vec[c]->R_G_to_C << endl << "Ptrue" << endl << cam_vec[c]->p_G_to_C << endl << endl;
+                cout << "Camera " << c << " est values- " << endl << "R_est- " << endl << R_0_2_c*R_g_2_0 << endl << "Ptrue" << endl << (R_g_2_0.transpose()*(p_c_in_0)+p_0_in_g) << endl << endl << "////////////////////////" << endl;
+            }
+
+
+
+            cout << "Hello 620" << endl;
 
             bool bad=false;
-            for (int f=0; f< cam_t->feature_list.size(); f++){
+            /*for (int f=0; f< cam_t->feature_list.size(); f++){
                 if (cam_t->feature_list[f]->feature->estimate().norm() > 1000){
                     bad= true;
                 }
                 cout << "feature " << f << endl << cam_t->feature_list[f]->feature->estimate() << endl << endl << ".............." << endl << endl;
-            }
+            }*/
 
             if (cam_t->camera_vertex->estimate().norm() >1000){
                 bad =true;
@@ -659,6 +728,17 @@ int main() {
         cout << "Camera " << c << " est values- " << endl << "R_est- " << endl << R_0_2_c*R_g_2_0 << endl << "Ptrue" << endl << (R_g_2_0.transpose()*(p_c_in_0)+p_0_in_g) << endl << endl << "////////////////////////" << endl;
     }
 
+    cout << "Calib" << endl << Calib->estimate() << endl;
+
+
+
+    cout << "//////////////////////////////" << endl << endl;
+    //cout << R_C_to_S << endl;
+    cout << "Calibtrue" << endl << rot_2_quat((Ryneg90*Rxneg90).transpose()) << endl <<0 << endl <<0 << endl << 0 << endl;
+
+
+
+    cout << "Calibbegin" << endl << calib_meas << endl << endl;
 
 
 
