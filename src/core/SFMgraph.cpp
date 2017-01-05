@@ -193,11 +193,12 @@ namespace MAST {
 
         Eigen::Matrix<double, 3, 3> Pinv= P.inverse();
 
-        Eigen::MatrixSquareRoot<Eigen::Matrix<double,3,3>,0> sqrm(Pinv);
+        // Unsupported in new Eigen (01/05/16)
+        //Eigen::MatrixSquareRoot<Eigen::Matrix<double,3,3>,0> sqrm(Pinv);
+        //Eigen::Matrix<double, 3, 3> Psqrinv = Pinv.sqrt();
+        //sqrm.compute(Psqrinv);
 
-        Eigen::Matrix<double, 3, 3> Psqrinv;
-
-        sqrm.compute(Psqrinv);
+        Eigen::Matrix<double, 3, 3> Psqrinv = Pinv.sqrt();
 
         Eigen::Matrix<double, 3, 3> U = M * (Psqrinv);
 

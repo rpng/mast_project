@@ -70,10 +70,21 @@ else (EIGEN3_INCLUDE_DIR)
 
   if(EIGEN3_INCLUDE_DIR)
     _eigen3_check_version()
+    # Check for 'unsupported' header files, which provide some Krylov solvers
+    find_path(EIGEN3_UNSUPPORTED_HEADERS NAMES SparseExtra PATHS
+      ${EIGEN3_INCLUDE_DIR}
+      PATH_SUFFIXES unsupported/Eigen)
+
+    if(NOT EIGEN3_UNSUPPORTED_HEADERS)
+      message(STATUS "Cannot find Eigen3 'unsupported' header files. "
+        "Make sure you install Eigen3 and not just copy header files.")
+    endif(NOT EIGEN3_UNSUPPORTED_HEADERS)
+
+
   endif(EIGEN3_INCLUDE_DIR)
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(Eigen3 DEFAULT_MSG EIGEN3_INCLUDE_DIR EIGEN3_VERSION_OK)
+  find_package_handle_standard_args(Eigen3 DEFAULT_MSG EIGEN3_INCLUDE_DIR EIGEN3_VERSION_OK EIGEN3_UNSUPPORTED_HEADERS)
 
   mark_as_advanced(EIGEN3_INCLUDE_DIR)
 
