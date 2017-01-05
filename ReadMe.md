@@ -14,10 +14,10 @@
 * Run the program `./mast_project_synth`
 
 
-
 ## Dependencies
 
 * Eigen3 - `sudo apt-get install libeigen3-dev`
+* Eigen3 Unsupported - Included in the above
 * OpenCV 3.0 - http://opencv.org/
     * Use OpenCV 3.0 not opencv 2.x
     * Ensure you install using `sudo make install`
