@@ -1,6 +1,9 @@
 # Underwater Camera and Sonar SLAM
 
 
+![overview](doc/readme_overview.png)
+
+
 ## Building
 
 * Clone the repository
