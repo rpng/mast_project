@@ -16,7 +16,7 @@ else()
 endif()
 
 
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(G2O REQUIRED)
 find_package(SuiteParse REQUIRED)
 find_package(OpenCV 3 REQUIRED)
@@ -31,7 +31,7 @@ include_directories(
 		${OpenCV_INCLUDE_DIRS}
 )
 
-#add_executable(ImageSim ImageSim.cpp)
+# Create the binary file
 add_executable(mast_project
 		src/main.cpp
 		src/core/SFMgraph.cpp
@@ -41,9 +41,7 @@ add_executable(mast_project
 		src/core/Frame_Classes.cpp
 		src/core/Initilizer.cpp
 )
-
-target_link_libraries (mast_project ${OpenCV_LIBS} ${G2O_LIBRARIES} csparse
-	cxsparse)
+target_link_libraries (mast_project ${OpenCV_LIBS} ${G2O_LIBRARIES} csparse cxsparse)
 
 
 
